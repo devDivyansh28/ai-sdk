@@ -3,7 +3,7 @@ import 'dotenv/config'
 
 async function main(){
     const result = streamText({
-      model: "openai/gpt-5-mini",
+      model: "amazon/nova-lite",
       prompt: "Invent a holiday and describe its traditions ",
     });
     
