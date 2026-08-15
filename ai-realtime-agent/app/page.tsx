@@ -8,7 +8,7 @@ import { useMemo } from "react";
 export default function Page() {
 
   const model = useMemo(
-    () => gateway.experimental_realtime("xai/grok-voice-think-fast-2.0"),
+    () => gateway.experimental_realtime("openai/gpt-realtime-mini"),
     [],
   );
 
