@@ -6,8 +6,9 @@ import { gateway } from "@ai-sdk/gateway";
 import { useMemo } from "react";
 
 export default function Page() {
+
   const model = useMemo(
-    () => gateway.experimental_realtime("openai/gpt-realtime-mini"),
+    () => gateway.experimental_realtime("xai/grok-voice-think-fast-2.0"),
     [],
   );
 
@@ -21,10 +22,10 @@ export default function Page() {
   } = useRealtime({
     model,
     api: { token: "/api/realtime/token" },
-    sessionConfig: {
-      voice: "alloy",
-      turnDetection: { type: "server-vad" },
-    },
+    // sessionConfig: {
+    //   voice: "Eve",
+    //   // turnDetection: { type: "server-vad" },
+    // },
   });
 
   const toggleMic = async () => {
@@ -38,7 +39,16 @@ export default function Page() {
 
   return (
     <main style={{ padding: 24 }}>
-      <p>Status: {status}</p>
+     <pre>
+  {JSON.stringify(
+    {
+      status,
+      isCapturing,
+    },
+    null,
+    2,
+  )}
+</pre>
       <button onClick={status === "connected" ? disconnect : connect}>
         {status === "connected" ? "Disconnect" : "Connect"}
       </button>
