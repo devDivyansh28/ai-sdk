@@ -1,13 +1,11 @@
-"use client"
+"use client";
 
-import {useChat} from "@ai-sdk/react"
-import {useState} from 'react';
+import { useChat } from "@ai-sdk/react";
+import { useState } from "react";
 
 export default function Chat() {
-   
-  const [input , setInput] = useState('');
-  const {messages , sendMessage} = useChat();
-
+  const [input, setInput] = useState("");
+  const { messages, sendMessage } = useChat();
   return (
     <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
       {messages.map((message) => (
@@ -17,6 +15,12 @@ export default function Chat() {
             switch (part.type) {
               case "text":
                 return <div key={`${message.id}-${i}`}>{part.text}</div>;
+              case "tool-weather":
+                return (
+                  <pre key={`${message.id}-${i}`}>
+                    {JSON.stringify(part, null, 2)}
+                  </pre>
+                );
             }
           })}
         </div>
