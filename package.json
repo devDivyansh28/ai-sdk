@@ -1,0 +1,26 @@
+{
+  "name": "AI sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.4.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "@ai-sdk/gateway": "^4.0.52",
+    "@ai-sdk/react": "^4.0.69",
+    "ai": "^7.0.66",
+    "zod": "^4.4.3"
+  }
+}

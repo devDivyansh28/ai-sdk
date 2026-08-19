@@ -1,0 +1,77 @@
+import { generateText, Output } from "ai";
+import { z } from "zod";
+
+async function translateWithFeedback(text: string, targetLanguage: string) {
+  let currentTranslation = "";
+  let iterations = 0;
+  const MAX_ITERATIONS = 3;
+
+  // Initial translation
+  const { text: translation } = await generateText({
+    model: "google/gemini-3.1-pro-preview",
+    instructions: "You are an expert literary translator.",
+    prompt: `Translate this text to ${targetLanguage}, preserving tone and cultural nuances:
+    ${text}`,
+  });
+
+  currentTranslation = translation;
+
+  // Evaluation-optimization loop
+  while (iterations < MAX_ITERATIONS) {
+    // Evaluate current translation
+    const { output: evaluation } = await generateText({
+      model: "google/gemini-3.1-pro-preview",
+      output: Output.object({
+        schema: z.object({
+          qualityScore: z.number().min(1).max(10),
+          preservesTone: z.boolean(),
+          preservesNuance: z.boolean(),
+          culturallyAccurate: z.boolean(),
+          specificIssues: z.array(z.string()),
+          improvementSuggestions: z.array(z.string()),
+        }),
+      }),
+      instructions: "You are an expert in evaluating literary translations.",
+      prompt: `Evaluate this translation:
+
+      Original: ${text}
+      Translation: ${currentTranslation}
+
+      Consider:
+      1. Overall quality
+      2. Preservation of tone
+      3. Preservation of nuance
+      4. Cultural accuracy`,
+    });
+
+    // Check if quality meets threshold
+    if (
+      evaluation.qualityScore >= 8 &&
+      evaluation.preservesTone &&
+      evaluation.preservesNuance &&
+      evaluation.culturallyAccurate
+    ) {
+      break;
+    }
+
+    // Generate improved translation based on feedback
+    const { text: improvedTranslation } = await generateText({
+      model: "google/gemini-3.1-pro-preview",
+      instructions: "You are an expert literary translator.",
+      prompt: `Improve this translation based on the following feedback:
+      ${evaluation.specificIssues.join("\n")}
+      ${evaluation.improvementSuggestions.join("\n")}
+
+      Original: ${text}
+      Current Translation: ${currentTranslation}`,
+    });
+
+    currentTranslation = improvedTranslation;
+    iterations++;
+  }
+
+  return {
+    finalTranslation: currentTranslation,
+    iterationsRequired: iterations,
+  };
+}
