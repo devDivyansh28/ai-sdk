@@ -1,11 +1,13 @@
-import { ToolLoopAgent, toUIMessageStream, tool , readUIMessageStream } from "ai";
+import { ToolLoopAgent, toUIMessageStream, tool , readUIMessageStream, InferAgentUIMessage } from "ai";
 import { z } from "zod";
 
 // Define a subagent for research tasks
 const researchSubagent = new ToolLoopAgent({
   model: "google/gemini-3.1-pro-preview",
-  instructions: `You are a research agent.
-Summarize your findings in your final response.`,
+  instructions: `You are a research agent. Complete the task autonomously.
+
+IMPORTANT: When you have finished, write a clear summary of your findings as your final response.
+This summary will be returned to the main agent, so include all relevant information.`,
   tools: {
     // read: readFileTool,
     // search: searchTool,
@@ -32,7 +34,16 @@ const researchTool = tool({
       yield message;
     }
   },
+  toModelOutput: ({ output: message }) => {
+    // Extract just the final text as a summary
+    const lastTextPart = message?.parts.findLast((p) => p.type === "text");
+    return {
+      type: "text",
+      value: lastTextPart?.text ?? "Task completed.",
+    };
+  },
 });
+// Controlling Context window of main agent...so we can control what output must be returned by subagent to feed the main agent so that's it'c context window may remain clean....so for this we can use toModelOutput
 
 // Main agent uses the research tool
 const mainAgent = new ToolLoopAgent({
@@ -42,3 +53,6 @@ const mainAgent = new ToolLoopAgent({
     research: researchTool,
   },
 });
+
+// Export the main agent message type for the chat UI
+export type MainAgentMessage = InferAgentUIMessage<typeof mainAgent>;
